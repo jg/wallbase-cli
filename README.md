@@ -12,5 +12,7 @@ Usage
 	--help, -h:   Show this message
 Examples:
 --------
-	List albums - ws.rb -u user -p pass -l
-	Get image links from album url - ws.rb -u user -p pass -g <url>
+	List albums 
+		ws.rb -u user -p pass -l
+	Get image links from album url 
+		ws.rb -u user -p pass -g <url>
