@@ -5,7 +5,7 @@ require 'mechanize'
 require 'trollop'
 
 class WallbaseScraper
-  attr_accessor :agent
+  attr_accessor :agent, :username, :password
 
   class Album
     attr_accessor :name, :url
@@ -18,14 +18,18 @@ class WallbaseScraper
     end
   end
 
+  def initialize(username, password)
+    @username, @password = username, password
+  end
+
   def login
     url = 'http://wallbase.cc/user/login_form'
     page = agent.get(url)
 
     form = page.form_with(:action => 'http://wallbase.cc/user/login')
 
-    form.username = 'jg'
-    form.pass = 'eephaix8'
+    form.username = @username
+    form.pass     = @password
 
     form.submit
   end
@@ -111,16 +115,33 @@ class WallbaseScraper
 end
 
 opts = Trollop::options do
-  banner "Wallbase.cc CLI utility"
+  banner <<-EOS
+    A wallbase.cc CLI utility
+
+    Usage:
+      ws.rb -u <username> -p <password> [options] 
+    
+    Examples:
+      List albums - ws.rb -u user -p pass -l
+      Get image links from album url - ws.rb -u user -p pass -g <url>
+
+  EOS
   opt :list_albums, "List albums", :short => 'l', :default => false
   opt :get_image_urls, "Get list of image urls for a given album url", :short => 'g', :type => String
   opt :get_incremental_image_urls, "Get incremental list of image urls for a given album url", :short => 'i', :type => String
+  opt :username, "Specify username", :short => 'u', :type => String, :required => true
+  opt :password, "Specify password", :short => 'p', :type => String, :required => true
 end
 
-s = WallbaseScraper.new
+unless opts[:list_albums] || opts[:get_image_urls]
+  Trollop::die "Specify an action to be performed"
+  exit 1
+end
+
+s = WallbaseScraper.new(opts[:username], opts[:password])
 
 if opts[:list_albums]
-  puts s.albums
+    puts s.albums
 end
 
 if opts[:get_image_urls]
